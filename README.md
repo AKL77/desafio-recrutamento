@@ -16,32 +16,27 @@ Veja [DOCKER.md](DOCKER.md) para instruções detalhadas sobre Docker.
 
 ### Opção 2: Configuração Local
 
-1. **Navegue para a pasta da aplicação:**
-```bash
-cd carro_facil
-```
-
-2. **Instale as dependências:**
+1. **Instale as dependências:**
 ```bash
 pip install -r requirements.txt
 ```
 
-3. **Execute as migrações:**
+2. **Execute as migrações:**
 ```bash
 python manage.py migrate
 ```
 
-4. **Carregue os dados iniciais (opcional):**
+3. **Carregue os dados iniciais (opcional):**
 ```bash
 python manage.py shell < init_data.py
 ```
 
-5. **Crie um superusuário (opcional, para painel admin):**
+4. **Crie um superusuário (opcional, para painel admin):**
 ```bash
 python manage.py createsuperuser
 ```
 
-6. **Inicie o servidor de desenvolvimento:**
+5. **Inicie o servidor de desenvolvimento:**
 ```bash
 python manage.py runserver
 ```
@@ -85,20 +80,19 @@ docker-compose exec web python manage.py test rentals
 ## Estrutura do Projeto
 
 ```
-carro_facil/              # Código da aplicação
-├── car_rental/           # Configurações do projeto Django
-├── rentals/              # Aplicação principal
-│   ├── models.py         # Modelos Django ORM
-│   ├── database.py       # Camada de acesso a dados (intencionalmente imperfeita)
-│   ├── views.py          # Views da API DRF
-│   ├── serializers.py    # Serializers DRF
-│   ├── urls.py           # Roteamento de URLs
-│   ├── admin.py          # Configuração do admin Django
-│   └── tests.py          # Casos de teste (incompletos)
-├── manage.py             # Script de gerenciamento Django
-├── requirements.txt      # Dependências Python
-├── Dockerfile            # Definição da imagem Docker
-└── docker-entrypoint.sh  # Script de inicialização do container
+car_rental/           # Configurações do projeto Django
+rentals/              # Aplicação principal
+├── models.py         # Modelos Django ORM
+├── database.py       # Camada de acesso a dados (intencionalmente imperfeita)
+├── views.py          # Views da API DRF
+├── serializers.py    # Serializers DRF
+├── urls.py           # Roteamento de URLs
+├── admin.py          # Configuração do admin Django
+└── tests.py          # Casos de teste (incompletos)
+manage.py             # Script de gerenciamento Django
+requirements.txt      # Dependências Python
+Dockerfile            # Definição da imagem Docker
+docker-entrypoint.sh  # Script de inicialização do container
 ```
 
 ## Observações
