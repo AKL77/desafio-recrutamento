@@ -5,7 +5,7 @@
 **Implementar um Sistema de Recompensas para Clientes** nesta plataforma de locação de carros.
 
 ### Visão Geral
-- **Prazo**: Até 5 dias (considerando que você pode ter um emprego diurno)
+- **Prazo**: Até 3 dias (considerando que você pode ter um emprego diurno)
 - **Funcionalidade**: Sistema de pontos de recompensa onde clientes ganham pontos baseados em atividade de locação
 - **Objetivo**: Avaliar suas habilidades de entrega, qualidade de código, testes e documentação
 
