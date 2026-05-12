@@ -177,10 +177,7 @@ Sua submissão será avaliada em:
 1. Criar um branch git: `git checkout -b feature/rewards-system`
 2. Fazer commit das mudanças com mensagens claras
 3. Incluir um resumo das mudanças em IMPLEMENTACAO.md
-4. Compactar a pasta `carro_facil/` e retornar o e-mail do recrutamento:
-```bash
-  git archive --format zip --output /caminho/para/arquivo.zip <nome_do_branch>
-```
+4. "Pushar" as suas mudanças em um repositório público e enviar o link como resposta ao e-mail de desafio
 
 ## Dúvidas?
 
