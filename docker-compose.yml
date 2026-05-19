@@ -4,7 +4,7 @@ services:
     container_name: car_rental_api
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
-      - ./wheeler_test:/app
+      - ./:/app
       - sqlite_data:/app/data
     ports:
       - "8000:8000"
