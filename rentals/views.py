@@ -56,13 +56,13 @@ def create_rental(request):
         return Response({"error": "Car is not available"}, status=status.HTTP_400_BAD_REQUEST)
     
     # Calcular custo
-    total_cost = daily_rate * days
+    total_cost = car.daily_rate * days
     
     # Aplicar desconto 
     if days > 7:
         total_cost = total_cost - (total_cost * 0.1)
     elif days > 3:
-        total_cost = total_cost - (total_cost * 0.05)
+        total_cost = total_cost - (total_cost * Decimal('0.05'))
     
     # Criar locação
     start_date = timezone.now()
