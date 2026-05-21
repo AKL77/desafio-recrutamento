@@ -129,7 +129,23 @@ class RentalAPITestCase(TestCase):
         self.assertIn('error', response.data)
 
     def test_devolver_carro_nao_encontrado(self):
-        """Teste para tentar devolver um carro com ID de locação inválido"""
+        """Teste para tentar devolver um carro com ID inválido"""
         response = self.client.post('/api/rentals/999/return/', format='json')
         self.assertEqual(response.status_code, 404)
         self.assertIn('error', response.data)
+
+    def test_obter_locacoes_cliente(self):
+        """Teste para obter locações de um cliente específico"""
+        Rental.objects.create(
+            car=self.car,
+            customer_name="Ana Paula",
+            customer_email="ana@example.com",
+            start_date=timezone.now() - timedelta(days=5),
+            end_date=timezone.now(),
+            total_cost=Decimal("250.00"),
+            returned=False
+        )
+
+        response = self.client.get('/api/rentals/customer/ana@example.com/')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
