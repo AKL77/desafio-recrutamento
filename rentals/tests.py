@@ -95,3 +95,35 @@ class RentalAPITestCase(TestCase):
         self.assertTrue(rental.returned)
         self.assertIsNotNone(rental.late_fee)
 
+    def test_alugar_carro_indisponivel(self):
+        """Teste para tentar alugar um carro que já está alugado"""
+        self.car.available = False
+        self.car.save()
+
+        data = {
+            "car_id": self.car.id,
+            "customer_name": "Samuel Samuel",
+            "customer_email": "samuel@example.com",
+            "days": 3
+        }
+
+        response = self.client.post('/api/rentals/create', data, format='json')
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('error', response.data)
+
+    def test_devolver_carro_ja_devolvido(self):
+        """Teste para tentar devolver um carro que já foi devolvido"""
+        rental = Rental.objects.create(
+            car=self.car,
+            customer_name="Lucas Silva",
+            customer_email="lucas@example.com",
+            start_date=timezone.now() - timedelta(days=5),
+            end_date=timezone.now(),
+            total_cost=Decimal("250.00"),
+            returned=True
+        )
+
+        response = self.client.post(f'/api/rentals/{rental.id}/return/', format='json')
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('error', response.data)

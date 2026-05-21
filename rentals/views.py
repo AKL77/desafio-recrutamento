@@ -8,7 +8,7 @@ from decimal import Decimal
 from .models import Car, Rental
 from .serializers import CarSerializer, RentalSerializer, RentalCreateSerializer
 from . import database
-
+from . import utils
 
 @api_view(['GET'])
 def index(request):
@@ -58,12 +58,9 @@ def create_rental(request):
     # Calcular custo
     total_cost = car.daily_rate * days
     
-    # Aplicar desconto 
-    if days > 7:
-        total_cost = total_cost - (total_cost * Decimal('0.10'))
-    elif days > 3:
-        total_cost = total_cost - (total_cost * Decimal('0.05'))
-    
+    desconto = utils.calculate_discount(days, total_cost)
+    total_cost = total_cost - desconto
+
     # Criar locação
     start_date = timezone.now()
     end_date = start_date + timedelta(days=days)
@@ -103,8 +100,8 @@ def return_rental(request, rental_id):
     if rental.actual_return_date > rental.end_date:
         late_days = (rental.actual_return_date - rental.end_date).days
         car = rental.car
-        late_fee = float(car.daily_rate) * late_days * 1.5
-        rental.late_fee = Decimal(str(late_fee))
+
+        rental.late_fee = utils.calculate_late_fee(late_days, car.daily_rate)
         rental.total_cost = rental.total_cost + rental.late_fee
     
     database.update_rental(rental)
