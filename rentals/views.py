@@ -9,6 +9,7 @@ from .models import Car, Rental
 from .serializers import CarSerializer, RentalSerializer, RentalCreateSerializer
 from . import database
 from . import utils
+from . import services
 
 @api_view(['GET'])
 def index(request):
@@ -35,87 +36,47 @@ def get_car(request, car_id):
 
 @api_view(['POST'])
 def create_rental(request):
-    """
-    Criar uma nova locação
-    """
     serializer = RentalCreateSerializer(data=request.data)
-    
+
     if not serializer.is_valid():
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     data = serializer.validated_data
-    car_id = data['car_id']
-    days = data['days']
-    
-    # Encontrar carro
-    car = database.get_car_by_id(car_id)
-    if car is None:
-        return Response({"error": "Car not found"}, status=status.HTTP_404_NOT_FOUND)
-    
-    if car.available == False:
-        return Response({"error": "Car is not available"}, status=status.HTTP_400_BAD_REQUEST)
-    
-    # Calcular custo
-    total_cost = car.daily_rate * days
-    
-    desconto = utils.calculate_discount(days, total_cost)
-    total_cost = total_cost - desconto
 
-    # Criar locação
-    start_date = timezone.now()
-    end_date = start_date + timedelta(days=days)
-    
-    rental = database.create_rental(
-        car_id=car_id,
-        customer_name=data['customer_name'],
-        customer_email=data['customer_email'],
-        start_date=start_date,
-        end_date=end_date,
-        total_cost=Decimal(str(total_cost))
-    )
-    
-    # Marcar carro como indisponível
-    car.available = False
-    database.update_car(car)
-    
-    rental_serializer = RentalSerializer(rental)
-    return Response(rental_serializer.data, status=status.HTTP_201_CREATED)
+    try:
+        rental = services.process_new_rental(
+            car_id=data['car_id'],
+            customer_name=data['customer_name'],
+            customer_email=data['customer_email'],
+            days=data['days']
+        )
+        return Response(RentalSerializer(rental).data, status=status.HTTP_201_CREATED)
+    except ValueError as e:
+        erro = str(e)
+        if erro == "Car not found":
+            status_code = status.HTTP_404_NOT_FOUND
+        else:
+            status_code = status.HTTP_400_BAD_REQUEST
+
+        return Response({"error": erro}, status=status_code)
 
 
 @api_view(['POST'])
 def return_rental(request, rental_id):
-    rental = database.get_rental_by_id(rental_id)
-    
-    if rental is None:
-        return Response({"error": "Rental not found"}, status=status.HTTP_404_NOT_FOUND)
-    
-    if rental.returned == True:
-        return Response({"error": "Car already returned"}, status=status.HTTP_400_BAD_REQUEST)
-    
-    # Marcar como retornado
-    rental.returned = True
-    rental.actual_return_date = timezone.now()
-    
-    # Calcular multas de atraso
-    if rental.actual_return_date > rental.end_date:
-        late_days = (rental.actual_return_date - rental.end_date).days
-        car = rental.car
+    try:
+        rental = services.process_return_rental(rental_id)
+        return Response({
+            "message": "Car returned successfully",
+            "rental": RentalSerializer(rental).data
+        })
+    except ValueError as e:
+        erro = str(e)
+        if erro == "Rental not found":
+            status_code = status.HTTP_404_NOT_FOUND
+        else:
+            status_code = status.HTTP_400_BAD_REQUEST
 
-        rental.late_fee = utils.calculate_late_fee(late_days, car.daily_rate)
-        rental.total_cost = rental.total_cost + rental.late_fee
-    
-    database.update_rental(rental)
-    
-    # Marcar carro como disponível
-    car = rental.car
-    car.available = True
-    database.update_car(car)
-    
-    serializer = RentalSerializer(rental)
-    return Response({
-        "message": "Car returned successfully",
-        "rental": serializer.data
-    })
+        return Response({"error": erro}, status=status_code)
 
 
 @api_view(['GET'])
