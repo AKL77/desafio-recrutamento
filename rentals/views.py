@@ -60,7 +60,7 @@ def create_rental(request):
     
     # Aplicar desconto 
     if days > 7:
-        total_cost = total_cost - (total_cost * 0.1)
+        total_cost = total_cost - (total_cost * Decimal('0.10'))
     elif days > 3:
         total_cost = total_cost - (total_cost * Decimal('0.05'))
     
