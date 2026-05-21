@@ -127,3 +127,9 @@ class RentalAPITestCase(TestCase):
         response = self.client.post(f'/api/rentals/{rental.id}/return/', format='json')
         self.assertEqual(response.status_code, 400)
         self.assertIn('error', response.data)
+
+    def test_devolver_carro_nao_encontrado(self):
+        """Teste para tentar devolver um carro com ID de locação inválido"""
+        response = self.client.post('/api/rentals/999/return/', format='json')
+        self.assertEqual(response.status_code, 404)
+        self.assertIn('error', response.data)
