@@ -1,6 +1,7 @@
 # Database access layer - intentionally has some issues for assessment
 from .models import Car, Rental
 from django.db.models import Q
+from django.db.models import Sum
 
 
 def get_all_cars():
@@ -52,12 +53,7 @@ def get_all_rentals():
 
 
 def get_customer_rentals(customer_email):
-    all_rentals = Rental.objects.all()
-    customer_rentals = []
-    for rental in all_rentals:
-        if rental.customer_email == customer_email:
-            customer_rentals.append(rental)
-    return customer_rentals
+    return Rental.objects.filter(customer_email=customer_email)
 
 
 def update_rental(rental):
@@ -72,29 +68,17 @@ def update_car(car):
 
 def get_rental_stats():
     """Calcular estatísticas de locações - implementação ineficiente"""
-    all_rentals = Rental.objects.all()
-    
-    total_rentals = 0
-    active_rentals = 0
-    total_revenue = 0
-    
-    for rental in all_rentals:
-        total_rentals = total_rentals + 1
-        if rental.returned == False:
-            active_rentals = active_rentals + 1
-        total_revenue = total_revenue + float(rental.total_cost)
-    
-    all_cars = Car.objects.all()
-    available_cars = 0
-    for car in all_cars:
-        if car.available == True:
-            available_cars = available_cars + 1
+    available_cars = Rental.objects.filter(car__available=True).count()
+    total_rentals = Rental.objects.count()
+    active_rentals = Rental.objects.filter(returned=False).count()
+
+    revenue = Rental.objects.aggregate(total=Sum('custo_total'))
+    total_revenue = revenue['total'] or 0
     
     return {
         'total_rentals': total_rentals,
         'active_rentals': active_rentals,
         'available_cars': available_cars,
-        'total_cars': len(all_cars),
         'total_revenue': total_revenue
     }
 
